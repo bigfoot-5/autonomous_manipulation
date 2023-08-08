@@ -1,4 +1,4 @@
-# Callibration
+# Callibration testing
 ## Build Moveit Callibration Repository
 Clone the Moveit_Callibration repository in the ```src``` folder in the workspace.
 ```
