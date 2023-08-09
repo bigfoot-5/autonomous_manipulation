@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from utils import position2pose, project_point, img_to_cv2
 from mask_rcnn import MaskRCNN
