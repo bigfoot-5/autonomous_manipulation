@@ -129,7 +129,7 @@ class MaskRCNN:
     def get_target_pixel(self,
                          boxes: list,
                          labels: list,
-                         target_class: str = 'keyboard') -> tuple:
+                         target_class: str) -> tuple:
         # Drawing bounding boxes
         print("Found {} objects".format(len(boxes)), labels)
 
