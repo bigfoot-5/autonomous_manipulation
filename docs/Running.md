@@ -8,7 +8,7 @@ Make sure all the python files in the scripts folder are executable.
 ```vision_realsense.py``` is used to detect objects in a scene. There are two parameters that it must be given. ```-m``` which takes in two values namely ```real``` which is used to control real robot and the camera and ```sim``` which is used for the simulated robot.```-t``` takes in the target object that we want to detect. In our example we took "bottle" as our object. Run the following command after placing the realsense camera on the ```wrist_3_link``` of the ur5 Robot.
 ```
 rosrun image2position vision_realsense.py -m real -t bottle
-```
+``` 
 This command will check if the "bottle" object is detected in a particular frame.
 It would give the following information about the bottle
 
