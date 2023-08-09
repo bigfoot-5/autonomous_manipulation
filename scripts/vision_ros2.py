@@ -27,6 +27,7 @@ from cv_bridge import CvBridge
 
 bridge = CvBridge()
 stream = Stream()
+stream.start()
 if __name__ == '__main__':
     mask_rcnn = MaskRCNN()
     segment_pub = rospy.Publisher(
@@ -50,7 +51,6 @@ if __name__ == '__main__':
             depth_image, target_centroid, depth_image_intrinsics)
 
         target_pose = position2pose(target_centroid_xyz)
-
         segment_pub.publish(bridge.cv2_to_imgmsg(image, 'bgr8'))
         target_pub.publish(target_pose)
         pointcloud_pub.publish(pointcloud)
