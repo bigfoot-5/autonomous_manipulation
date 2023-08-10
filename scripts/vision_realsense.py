@@ -2,6 +2,7 @@
 
 import numpy as np
 import argparse
+from sklearn.decomposition import PCA
 import cv2
 from torchvision.models.detection import maskrcnn_resnet50_fpn
 from torchvision import transforms as T
@@ -170,7 +171,33 @@ class MaskRCNN:
         except ValueError as e:
             print(e)
             return None
+    def perform_pca(self, image, masks, boxes:list, labels:list, target_class:str = 'keyboard') -> tuple:
+        try:
+            mask = masks[labels.index(target_class)]
+            y, x = np.where(mask)
 
+            # Perform PCA
+            points = np.vstack((x, y)).T
+            pca = PCA(n_components=2)
+            pca.fit(points)
+            grasp_axis = pca.components_[0]
+            grasp_direction = np.arctan2(grasp_axis[1], grasp_axis[0])
+
+            # Calculate grasping points
+            min_point = np.min(points, axis=0)
+            max_point = np.max(points, axis=0)
+            centroid = (min_point + max_point) // 2
+            grasp_point1 = centroid - 0.1 * grasp_axis
+            grasp_point2 = centroid + 0.1 * grasp_axis
+
+            return grasp_direction, grasp_point1, grasp_point2
+        
+        except IndexError as e:
+            print(e)
+            return None
+        except ValueError as e:
+            print(e)
+            return None
 
 if __name__ == '__main__':
 
@@ -194,6 +221,7 @@ if __name__ == '__main__':
                                PoseStamped, queue_size=10)
     segmentation_pub = rospy.Publisher('/vision/segmentation',
                                        Image, queue_size=10)
+    pca_pub = rospy.Publisher('/vision/pca', PoseStamped, queue_size=20)
     try:
 
         while not rospy.is_shutdown():
@@ -219,6 +247,36 @@ if __name__ == '__main__':
                 bounding_boxes, labels, args['target'])
             print("computed target centroid")
 
+            # target pca
+            sol = rcnn.perform_pca(color_image, masks, bounding_boxes, labels, args['target'])
+            if sol is not None:
+                grasp_direction, grasp1, grasp2 = sol
+            else:
+                print("yes")
+                grasp_direction = None
+                grasp1 = None
+                grasp2 = None
+
+            if grasp_direction is not None:
+                x, y = grasp1
+                z = depth_image[int(y), int(x)] / 1000
+
+                # 2d position to 3d position
+                position3D = rs.rs2_deproject_pixel_to_point(
+                    stream.intrinsics, [x, y], z)
+
+                position3D[0] += args['x_offset']
+                position3D[1] += args['y_offset']
+                position3D[2] += args['z_offset']
+
+                print(
+                    f'Target at \n\tx: {position3D[0]:.3f} y: {position3D[1]:.3f} z: {position3D[2]:.3f}')
+
+                pose = position2pose(position3D)
+
+                rospy.loginfo(pose)
+                pca_pub.publish(pose)
+                print("publishing pose")
             if target_centroid is not None:
                 x, y = target_centroid
                 z = depth_image[int(y), int(x)] / 1000

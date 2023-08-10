@@ -84,7 +84,7 @@ def gen_command(char):
 class UR5:
 
     def __init__(self,
-                 move_group_name: str = "manipulator",
+                 move_group_name: str = "ur5_arm",
                  reference_frame: str = "base_link",
                  end_effector_link: str = None,
                  robot_description: str = "robot_description",

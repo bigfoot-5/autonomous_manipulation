@@ -3,6 +3,8 @@ from torchvision import transforms as T
 from torchvision.models.detection import maskrcnn_resnet50_fpn
 import cv2
 import numpy as np
+from sklearn.decomposition import PCA
+
 
 
 # Classes names from coco
@@ -44,6 +46,32 @@ class MaskRCNN:
         self.transform = T.Compose([
             T.ToTensor()
         ])
+
+    def perform_pca(self, image, masks, boxes, labels, target_class):
+        target_centroid = self.get_target_pixel(boxes, labels, target_class)
+
+        if target_centroid is None:
+            return None, None
+
+        mask = masks[labels.index(target_class)]
+        y, x = np.where(mask)
+
+        # Perform PCA
+        points = np.vstack((x, y)).T
+        pca = PCA(n_components=2)
+        pca.fit(points)
+        grasp_axis = pca.components_[0]
+        grasp_direction = np.arctan2(grasp_axis[1], grasp_axis[0])
+
+        # Calculate grasping points
+        min_point = np.min(points, axis=0)
+        max_point = np.max(points, axis=0)
+        centroid = (min_point + max_point) // 2
+        grasp_point1 = centroid - 0.1 * grasp_axis
+        grasp_point2 = centroid + 0.1 * grasp_axis
+
+        return grasp_direction, grasp_point1, grasp_point2
+
 
     def forward(self,
                 image: np.ndarray,
