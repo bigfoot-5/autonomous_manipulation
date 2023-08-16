@@ -44,5 +44,6 @@ Enter "Create Target", and then "Save Target". An Aruco board will be created, w
 Place the printed AruCo board under the sensor of the UR5 arm. 
 5. In the "Calibrate" tab, click load joint states and browse to the file named ```joint_states_camera_calibration.yaml``` which is in the path ```/automonous-mainpulation/config```. 
 6. Now click `Plan`, and then click `Execute`. The first Sample will be taken. Repeat this step, until the Progress bar below reaches "100%". 
-![Alt text](resources/image4.png)
+<img width="694" alt="image4" src="https://github.com/bigfoot-5/autonomous_manipulation/assets/68162715/654466ba-d7a2-464c-b678-d4d088134fea">
+
 7. Finally click "Save camera pose" and save it in the launch folder as `camera_pose.launch`. This file will be used to callibrate the camera when planning grasping path towards the object.
